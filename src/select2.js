@@ -206,14 +206,26 @@ angular.module('ui.select2', []).value('uiSelect2Config', {}).directive('uiSelec
 
           // Not sure if I should just check for !isSelect OR if I should check for 'tags' key
           if (!opts.initSelection && !isSelect) {
+            // KAI dirty-check-fix Start (https://github.com/angular-ui/ui-select2/commit/ea6d6e8b0b769a223077bbe16abfc70490009b2a)
             var isPristine = controller.$pristine;
+            if(isPristine)
+            {
+                //fix wrong dirty flag when initializiing via expression
+                controller.$pristine = false;
+                controller.$dirty = true;
+            }
+            // KAI dirty-check-fix End
             controller.$setViewValue(
               convertToAngularModel(elm.select2('data'))
             );
+            // KAI dirty-check-fix Start
             if (isPristine) {
+              controller.$pristine = true;
+              controller.$dirty = false;
               controller.$setPristine();
             }
             elm.prev().toggleClass('ng-pristine', controller.$pristine);
+            // KAI dirty-check-fix End
           }
         });
       };

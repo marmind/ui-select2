@@ -22,7 +22,7 @@ angular.module('ui.select2', []).value('uiSelect2Config', {}).directive('uiSelec
 
       // Enable watching of the options dataset if in use
       if (tElm.is('select')) {
-        repeatOption = tElm.find( 'optgroup[ng-repeat], optgroup[data-ng-repeat], option[ng-repeat], option[data-ng-repeat]');
+        repeatOption = tElm.find('option[ng-repeat], option[data-ng-repeat]');
 
         if (repeatOption.length) {
           repeatAttr = repeatOption.attr('ng-repeat') || repeatOption.attr('data-ng-repeat');
@@ -39,7 +39,7 @@ angular.module('ui.select2', []).value('uiSelect2Config', {}).directive('uiSelec
         */
         var convertToAngularModel = function(select2_data) {
           var model;
-          if (opts.simple_tags) {
+          if (opts.simple_tags && opts.multiple === true) { //todo: upper patched: single select with tagging mode was not supported -> && opts.multiple === true
             model = [];
             angular.forEach(select2_data, function(value, index) {
               model.push(value.id);
@@ -59,7 +59,7 @@ angular.module('ui.select2', []).value('uiSelect2Config', {}).directive('uiSelec
             return model;
           }
 
-          if (opts.simple_tags) {
+          if (opts.simple_tags && opts.multiple === true) { //todo: upper patched: single select with tagging mode was not supported -> && opts.multiple === true
             model = [];
             angular.forEach(
               angular_data,
@@ -163,13 +163,8 @@ angular.module('ui.select2', []).value('uiSelect2Config', {}).directive('uiSelec
               var initSelection = opts.initSelection;
               opts.initSelection = function (element, callback) {
                 initSelection(element, function (value) {
-                  var isPristine = controller.$pristine;
                   controller.$setViewValue(convertToAngularModel(value));
                   callback(value);
-                  if (isPristine) {
-                    controller.$setPristine();
-                  }
-                  elm.prev().toggleClass('ng-pristine', controller.$pristine);
                 });
               };
             }
@@ -200,7 +195,7 @@ angular.module('ui.select2', []).value('uiSelect2Config', {}).directive('uiSelec
           elm.select2(opts);
 
           // Set initial value - I'm not sure about this but it seems to need to be there
-          elm.select2('data', controller.$modelValue);
+          elm.val(controller.$viewValue);
           // important!
           controller.$render();
 
